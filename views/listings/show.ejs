@@ -1,0 +1,249 @@
+<% layout("layouts/boilerplate") %>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+
+<style>
+  body {
+    background-color: #fcfcfcff; 
+    font-family: 'Poppins', sans-serif;
+    color: #444;
+  }
+
+  .casual-card {
+    background: #ffffff;
+    border-radius: 1.25rem;
+    border: 1px solid #e8f5e9;
+    box-shadow: 0 4px 12px rgba(129, 199, 132, 0.1);
+    padding: 1.5rem;
+  }
+
+  .host-badge {
+    background-color: #e8f5e9;
+    color: #388e3c;
+    font-weight: 600;
+  }
+  
+  .reserve-btn {
+    background: linear-gradient(135deg, #FF5A5F, #f86571ff);
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: 50px;
+    padding: 0.65rem 1.2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .reserve-btn:hover {
+    color: white;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 15px rgba(102, 187, 106, 0.3);
+  }
+
+  .amenity-badge {
+    background-color: #f0f8ff;
+    color: #5d9cec;
+    border: 1px solid #d6eaff;
+  }
+
+  .listing-image {
+    max-height: 400px;
+    object-fit: cover;
+  }
+
+  .map-container {
+    height: 300px; 
+    border-radius: 15px; 
+    width: 100%;
+  }
+
+  .info-title {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .info-text {
+    color: #555;
+  }
+</style>
+
+<script>
+  const mapToken = "<%= process.env.MAP_TOKEN %>";
+  const listingData = <%- JSON.stringify(listing) %>;
+  const coords = listingData.geometry && listingData.geometry.coordinates 
+                 ? listingData.geometry.coordinates 
+                 : [75.85, 26.92]; // default coordinates if missing
+</script>
+
+<div class="container mt-5">
+  <div class="row">
+
+    <!-- Left Column -->
+    <div class="col-lg-8">
+
+      <!-- Title & Location -->
+      <h2 class="fw-bold mb-2"><%= listing.title %></h2>
+      <p class="text-muted mb-3"><%= listing.location %>, <%= listing.country %></p>
+
+      <!-- Hero Image -->
+      <div class="mb-4">
+        <img src="<%= listing.image.url %>" class="img-fluid rounded-3 shadow-sm listing-image" alt="A lovely picture of <%= listing.title %>">
+      </div>
+      <hr>
+
+      <!-- Owner Info -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+              <h4 class="mb-0">Hosted by <%= listing.owner.username %></h4>
+              <% if(listing.owner.dob){ %>
+              <p class="text-muted mb-0">Born on: <%= listing.owner.dob %></p>
+              <% } %>
+              <% if(listing.owner.contact){ %>
+              <p class="text-muted mb-0">Contact: <%= listing.owner.contact %></p>
+              <% } %>
+          </div>
+          <div class="text-center">
+              <span class="host-badge rounded-pill p-2"><%= listing.owner.username %></span>
+              <p class="small text-muted mb-0 mt-1">Your Host</p>
+          </div>
+      </div>
+      <hr>
+
+      <!-- Description -->
+      <div class="mb-4">
+        <h5 class="info-title">A Little About Our Place 🏡</h5>
+        <p class="info-text"><%= listing.description %></p>
+      </div>
+
+      <!-- Amenities -->
+      <% if(listing.amenities && listing.amenities.length > 0) { %>
+      <div class="mb-4">
+        <h5 class="info-title">What We Offer</h5>
+        <div class="d-flex flex-wrap gap-2">
+          <% listing.amenities.forEach(am => { %>
+            <span class="badge amenity-badge p-2"><%= am %></span>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Property Details -->
+      <div class="mb-4 casual-card">
+        <h5 class="info-title">Property Details</h5>
+        <p class="info-text"><strong>Price per Night:</strong> ₹<%= listing.price.toLocaleString("en-IN") %></p>
+        <p class="info-text"><strong>Max Guests:</strong> <%= listing.guests %></p>
+        <p class="info-text"><strong>Bedrooms:</strong> <%= listing.bedrooms %></p>
+        <p class="info-text"><strong>Beds:</strong> <%= listing.beds %></p>
+        <p class="info-text"><strong>Bathrooms:</strong> <%= listing.bathrooms %></p>
+        <p class="info-text"><strong>Place Type:</strong> <%= listing.placeType %></p>
+      </div>
+
+      <!-- Full Address -->
+      <div class="mb-4 casual-card">
+        <h5 class="info-title">Location</h5>
+        <p class="info-text"><%= listing.location %></p>
+        
+
+      </div>
+
+      <!-- Reviews -->
+      <div class="mb-4">
+        <h5 class="info-title">Guest Reviews ❤️</h5>
+        <% if(currUser) { %>
+        <form action="/listings/<%= listing.id %>/reviews" method="POST" class="my-4 p-3 bg-light rounded-3 needs-validation" novalidate>
+          <h6>Share your thoughts!</h6>
+          <div class="mb-3">
+            <fieldset class="starability-growRotate">
+              <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
+              <% for(let i=1; i<=5; i++) { %>
+                <input type="radio" id="rate<%= i %>" name="review[rating]" value="<%= i %>">
+                <label for="rate<%= i %>" title="<%= i %> star"><%= i %> star</label>
+              <% } %>
+            </fieldset>
+          </div>
+          <div class="mb-3">
+            <textarea class="form-control" name="review[comment]" rows="3" required placeholder="Tell us about your stay..."></textarea>
+            <div class="invalid-feedback">A comment is always appreciated!</div>
+          </div>
+          <button class="btn btn-dark">Post Review</button>
+        </form>
+        <% } %>
+
+        <% if(listing.reviews && listing.reviews.length > 0) { %>
+          <% listing.reviews.forEach(review => { %>
+            <div class="d-flex mb-3">
+                <div class="flex-shrink-0"><i class="bi bi-person-circle fs-3 text-secondary"></i></div>
+                <div class="flex-grow-1 ms-3">
+                    <h6 class="mb-0"><%= review.author.username %></h6>
+                    <p class="starability-result mb-1" data-rating="<%= review.rating %>"></p>
+                    <p class="card-text text-secondary"><%= review.comment %></p>
+                    <% if(currUser && currUser._id.equals(review.author._id)) { %>
+                    <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                        <button class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                    <% } %>
+                </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p class="text-muted">Be the first to leave a review!</p>
+        <% } %>
+      </div>
+
+      <!-- Map -->
+      <div class="mb-4">
+        <h5 class="info-title">Where You'll Be</h5>
+        <div id="map" class="map-container shadow-sm"></div>
+      </div>
+
+    </div>
+
+    <!-- Right Column / Booking Card -->
+    <div class="col-lg-4">
+      <div class="casual-card sticky-top" style="top:4rem;">
+        <h4 class="fw-bold mb-1">₹<%= (listing.price).toLocaleString("en-IN") %> <span class="fw-normal fs-6 text-muted">/ night</span></h4>
+        <p class="small text-muted mb-3">(Before taxes and fees)</p>
+
+        <a href="/bookings/new/<%= listing._id %>" class="btn reserve-btn w-100 btn-lg mb-3">Reserve Your Spot</a>
+
+        <div class="mt-3">
+            <h6 class="fw-bold">Good to Know</h6>
+            <ul class="list-unstyled">
+                <li><i class="bi bi-clock-fill me-2"></i><strong>Check-in:</strong> <%= listing.checkInTime || "After 2 PM" %></li>
+                <li><i class="bi bi-clock me-2"></i><strong>Check-out:</strong> <%= listing.checkOutTime || "Before 11 AM" %></li>
+            </ul>
+        </div>
+        
+        <% if(listing.rules && listing.rules.length > 0) { %>
+        <div class="mt-2">
+            <h6 class="fw-bold">A Few House Rules</h6>
+            <ul class="list-unstyled">
+              <% listing.rules.forEach(rule => { %>
+                <li><i class="bi bi-dot"></i><%= rule %></li>
+              <% }) %>
+            </ul>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+<script>
+  mapboxgl.accessToken = mapToken;
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: coords,
+    zoom: 12
+  });
+
+  new mapboxgl.Marker()
+    .setLngLat(coords)
+    .addTo(map);
+</script>

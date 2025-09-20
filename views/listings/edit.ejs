@@ -1,0 +1,198 @@
+  <!-- <% layout("layouts/boilerplate") %>
+  <div class="row mt-3">
+        <div class="col-8 offset-2">
+    
+    <h3>Edit your List</h3>
+    <form method="post" action="/listings/<%= listing._id %>?_method=put" novalidate class="needs-validation" enctype="multipart/form-data">
+
+  <div class="mb-3">
+    <label for="Title" class="form-label">Title</label>
+    <input name="listing[title]"
+      value="<%= listing.title ? listing.title.trim() : '' %>"
+      type="text"
+      class="form-control"
+      required>
+    <div class="valid-feedback">Looks good.</div>
+    <div class="invalid-feedback">Please enter a valid title.</div>
+  </div>
+
+  <div class="mb-3">
+    <label for="description" class="form-label">Description</label>
+    <textarea name="listing[description]" class="form-control" required><%= listing.description ? listing.description.trim() : '' %></textarea>
+    <div class="valid-feedback">Looks good.</div>
+    <div class="invalid-feedback">Please enter a valid description.</div>
+  </div>
+
+<div class="mb-3">
+  Original Listing Image <br>
+  <img src="<%=originalImageUrl%>" height="300 rem">
+</div>
+
+  <div class="mb-3">
+    <label for="image" class="form-label">Upload New Image</label>
+    <input name="listing[image]"
+      type="file"
+      class="form-control">
+  </div>
+
+  <div class="row">
+    <div class="mb-3 col-md-4">
+      <label for="price" class="form-label">Price</label>
+      <input name="listing[price]"
+        value="<%= listing.price || '' %>"
+        type="number"
+        class="form-control"
+        required>
+      <div class="valid-feedback">Looks good.</div>
+      <div class="invalid-feedback">Please enter a valid price.</div>
+    </div>
+
+    <div class="mb-3 col-md-8">
+      <label for="country" class="form-label">Country</label>
+      <input name="listing[country]"
+        value="<%= listing.country ? listing.country.trim() : '' %>"
+        type="text"
+        class="form-control"
+        required>
+      <div class="valid-feedback">Looks good.</div>
+      <div class="invalid-feedback">Please enter a valid country.</div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="location" class="form-label">Location</label>
+    <input name="listing[location]"
+      value="<%= listing.location ? listing.location.trim() : '' %>"
+      type="text"
+      class="form-control"
+      required>
+    <div class="valid-feedback">Looks good.</div>
+    <div class="invalid-feedback">Please enter a valid location.</div>
+  </div>
+
+  <button class="btn btn-dark edit-btn mt-3">Edit</button>
+</form>
+
+    </div>
+    </div> -->
+<% layout("layouts/boilerplate") %>
+
+<%
+  const formatDate = (date) => {
+    if (!date) return '';
+    return new Date(date).toISOString().split('T')[0];
+  };
+%>
+
+<div class="row mt-3">
+  <div class="col-8 offset-2">
+    <h3>Edit Your Listing</h3>
+<form method="post" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+      <h4 class="mt-4">Owner Details</h4>
+      <div class="row">
+        <div class="mb-3 col-md-6">
+          <label for="ownerName" class="form-label">Owner Name</label>
+          <input name="listing[ownerName]" value="<%= listing.ownerName %>" type="text" class="form-control" required>
+          <div class="invalid-feedback">Owner name is required.</div>
+        </div>
+        <div class="mb-3 col-md-3">
+          <label for="dob" class="form-label">Date of Birth</label>
+          <input name="listing[dob]" value="<%= formatDate(listing.dob) %>" type="date" class="form-control" required>
+          <div class="invalid-feedback">Date of Birth is required.</div>
+        </div>
+        <div class="mb-3 col-md-3">
+          <label for="contact" class="form-label">Contact Number</label>
+          <input name="listing[contact]" value="<%= listing.contact %>" type="tel" class="form-control" pattern="^[6-9]\d{9}$" required>
+          <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
+        </div>
+      </div>
+
+      <h4 class="mt-4">Place Details</h4>
+      <div class="mb-3">
+        <label for="title" class="form-label">Listing Title</label>
+        <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control" required>
+        <div class="invalid-feedback">Title is required.</div>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea name="listing[description]" class="form-control" required><%= listing.description %></textarea>
+        <div class="invalid-feedback">Description is required.</div>
+      </div>
+      <div class="mb-3">
+        <label for="price" class="form-label">Price per night (INR)</label>
+        <input name="listing[price]" value="<%= listing.price %>" type="number" class="form-control" required min="0">
+        <div class="invalid-feedback">Please enter a valid price.</div>
+      </div>
+      <div class="mb-3">
+        <label for="manualAddress" class="form-label">Street Address / Location</label>
+        <input name="listing[manualAddress]" value="<%= listing.manualAddress %>" type="text" class="form-control" required disabled>
+        <div class="form-text">Address cannot be changed after creation.</div>
+      </div>
+      <div class="mb-3">
+        <label for="residentialAddress" class="form-label">Full Residential Address</label>
+        <textarea name="listing[residentialAddress]" class="form-control" required disabled><%= listing.residentialAddress %></textarea>
+      </div>
+
+      <h4 class="mt-4">Property Specifics</h4>
+      <div class="row">
+        <div class="mb-3 col-md-3">
+          <label for="guests" class="form-label">Max Guests</label>
+          <input name="listing[guests]" value="<%= listing.guests %>" type="number" class="form-control" required min="1">
+          <div class="invalid-feedback">Must allow at least 1 guest.</div>
+        </div>
+        <div class="mb-3 col-md-3">
+          <label for="bedrooms" class="form-label">Bedrooms</label>
+          <input name="listing[bedrooms]" value="<%= listing.bedrooms %>" type="number" class="form-control" required min="0">
+        </div>
+        <div class="mb-3 col-md-3">
+          <label for="beds" class="form-label">Beds</label>
+          <input name="listing[beds]" value="<%= listing.beds %>" type="number" class="form-control" required min="0">
+        </div>
+        <div class="mb-3 col-md-3">
+          <label for="bathrooms" class="form-label">Bathrooms</label>
+          <input name="listing[bathrooms]" value="<%= listing.bathrooms %>" type="number" class="form-control" required min="0">
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="placeType" class="form-label">Place Type</label>
+        <select name="listing[placeType]" class="form-select" required>
+          <option value="Entire place" <%= listing.placeType === 'Entire place' ? 'selected' : '' %>>Entire place</option>
+          <option value="Private room" <%= listing.placeType === 'Private room' ? 'selected' : '' %>>Private room</option>
+          <option value="Shared room" <%= listing.placeType === 'Shared room' ? 'selected' : '' %>>Shared room</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Categories (select all that apply)</label>
+        <% const allCategories = ["Trending", "Rooms", "Iconic cities", "Mountains", "Cabins", "Beaches", "Amazing pools", "Farms", "Countryside", "Castles", "Arctic"]; %>
+        <div class="row row-cols-2 row-cols-md-4 g-2">
+            <% for(let category of allCategories) { %>
+              <div class="col">
+                <input type="checkbox"
+                       class="form-check-input"
+                       id="category-<%= category %>"
+                       name="listing[category][]"
+                       value="<%= category %>"
+                       <%= listing.category.includes(category) ? 'checked' : '' %>>
+                <label class="form-check-label" for="category-<%= category %>"><%= category %></label>
+              </div>
+            <% } %>
+        </div>
+      </div>
+
+      <h4 class="mt-4">Listing Image</h4>
+      <div class="mb-3">
+        Original Image: <br>
+        <img src="<%= listing.image.url %>" class="img-fluid" style="max-height: 300px; border-radius: 1rem;">
+      </div>
+      <div class="mb-3">
+        <label for="image" class="form-label">Upload a New Image (optional)</label>
+        <input name="listing[image]" type="file" class="form-control">
+        <div class="form-text">If you upload a new image, it will replace the original.</div>
+      </div>
+      
+      <button class="btn btn-dark edit-btn mt-3 mb-5">Save Changes</button>
+    </form>
+  </div>
+</div>

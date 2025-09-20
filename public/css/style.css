@@ -1,0 +1,163 @@
+body{
+    /* font-family:"Plus Jakarta Sans", sans-serif !important; */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  font-size: 1rem;
+  color: #222;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+
+
+
+}
+h1, h2, h3 {
+  font-weight: 600;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+.container
+{
+    flex: 1;
+}
+/*nabvar*/
+.navbar
+{
+    height: 5rem;
+    background-color: white;
+/*background: linear-gradient(135deg, #F5F5F5 0%, #FFFFFF 50%, #F5F5F5 100%);*/
+
+}
+.logo{
+    height:65px ; 
+    width: auto; 
+    filter: drop-shadow(0 4px 10px rgba(255, 90, 95, 0.3));
+  transition: filter 0.3s ease, transform 0.2s ease;
+}
+.logo:hover {
+  filter: drop-shadow(0 6px 16px rgba(255, 90, 95, 0.4));
+  transform: translateY(-4px);
+}
+ 
+
+
+.nav-link
+{
+    color: #222222 !important; 
+
+}
+.nav-link:hover{
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+/* footer */
+.f-info-links a:hover{
+ text-decoration: none;
+ color: #222222;
+}
+
+.f-info-links,.f-info-socials,.f-info-brand{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.f-info-socials i{
+    font-size: 1.3rem;
+    margin-right: 1rem;
+}
+
+.f-info-socials i:hover {
+    transform: scale(1.9);
+    transition: all 0.5s ease;
+}
+
+
+.f-info{
+    display:flex;
+    height: 8rem;
+    background-color: #ebebeb;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: space-evenly;
+    text-align: center;
+}
+
+/* cards */
+
+.listing-card
+{
+    border: none !important;
+    margin-bottom: 2rem;
+}
+
+.card-img-top
+{
+    border-radius: 1rem !important;
+    width: 100% !important;
+    object-fit: cover !important;
+}
+
+.card-body
+{
+    padding: 0 !important;
+}
+
+.card-text p
+{
+     font-weight: 400 !important;     
+}
+
+.listing-link
+{
+    text-decoration: none;
+}
+
+.card-img-overlay
+{
+    opacity: 0;
+}
+
+.card-img-overlay:hover
+{
+    opacity: 0.2;
+    background-color: white;
+}
+
+/* New Page */
+
+
+/* Edit Page */
+.edit-btn , .add-btn
+{
+     background-color: #fe424d !important; 
+    border: none !important;
+}  
+
+
+/* Show Page */
+.show-img
+{
+    height: 30vh;
+}
+.btns
+{
+    display: flex;
+}
+.show-card
+{
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* map */
+#map { 
+    height:400px;
+       width: 90vh;
+     }

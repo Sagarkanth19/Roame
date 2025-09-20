@@ -1,0 +1,197 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+  .filters-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding: 0.5rem 1rem;
+  }
+
+  #filters {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    scrollbar-width: none;
+  }
+
+  #filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter {
+    flex: 0 0 auto;
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  .filter:hover {
+    opacity: 1;
+    cursor: pointer;
+    transform: scale(1.2);
+    transition: all 0.3s ease;
+  }
+
+  .filter p {
+    font-size: 0.8em;
+    margin-top: 0.2rem;
+  }
+
+  .filter a {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tax-toggle {
+    border: 1px solid rgb(127, 127, 127);
+    border-radius: 1rem;
+    height: 3.2rem;
+    padding: 1rem;
+    margin-left: 1rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .form-check-input:checked {
+    background-color: #FF5A5F;
+    border-color: #FF5A5F;
+    box-shadow: 0 0 0 0.25rem rgba(255, 90, 95, 0.25);
+  }
+
+  .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 90, 95, 0.25);
+  }
+
+  .scroll-btn {
+    background-color: white;
+    border: none;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .scroll-btn.left {
+    margin-right: 0.2rem;
+  }
+
+  .scroll-btn.right {
+    margin-left: 0.2rem;
+  }
+</style>
+
+<div class="filters-container">
+  <button class="scroll-btn left" onclick="scrollFilters(-200)">
+    <i class="fa-solid fa-chevron-left"></i>
+  </button>
+
+  <div id="filters">
+    <div class="filter"><a href="/listings?category=Rooms"><i class="fa-solid fa-bed"></i><p>Rooms</p></a></div>
+    <div class="filter"><a href="/listings?category=Trending"><i class="fa-solid fa-fire"></i><p>Trending</p></a></div>
+    <div class="filter"><a href="/listings?category=Iconic Cities"><i class="fa-solid fa-mountain-city"></i><p>Iconic Cities</p></a></div>
+    <div class="filter"><a href="/listings?category=Castles"><i class="fa-solid fa-chess"></i><p>Castles</p></a></div>
+    <div class="filter"><a href="/listings?category=Camping"><i class="fa-solid fa-campground"></i><p>Camping</p></a></div>
+    <div class="filter"><a href="/listings?category=Farms"><i class="fa-solid fa-cow"></i><p>Farms</p></a></div>
+    <div class="filter"><a href="/listings?category=Domes"><i class="fa-solid fa-igloo"></i><p>Domes</p></a></div>
+    <div class="filter"><a href="/listings?category=Mountains"><i class="fa-solid fa-mountain"></i><p>Mountains</p></a></div>
+    <div class="filter"><a href="/listings?category=Arctic"><i class="fa-solid fa-snowman"></i><p>Arctic</p></a></div>
+    <div class="filter"><a href="/listings?category=Amazing Pools"><i class="fa-solid fa-person-swimming"></i><p>Amazing Pools</p></a></div>
+    <div class="filter"><a href="/listings?category=Boates"><i class="fa-solid fa-ship"></i><p>Boates</p></a></div>
+    <div class="filter"><a href="/listings?category=Beachfront"><i class="fa-solid fa-umbrella-beach"></i><p>Beachfront</p></a></div>
+    <div class="filter"><a href="/listings?category=Lake View"><i class="fa-solid fa-house-flood-water"></i><p>Lake View</p></a></div>
+    <div class="filter"><a href="/listings?category=Cityscapes"><i class="fa-solid fa-building"></i><p>Cityscapes</p></a></div>
+    <div class="filter"><a href="/listings?category=Windmills"><i class="fa-solid fa-wind"></i><p>Windmills</p></a></div>
+    <div class="filter"><a href="/listings?category=Luxury"><i class="fa-solid fa-hotel"></i><p>Luxury</p></a></div>
+    <div class="filter"><a href="/listings?category=Islands"><i class="fa-solid fa-house-tsunami"></i><p>Islands</p></a></div>
+    <div class="filter"><a href="/listings?category=Treehouses"><i class="fa-solid fa-tree"></i><p>Treehouses</p></a></div>
+    <div class="filter"><a href="/listings?category=Tiny Homes"><i class="fa-solid fa-cubes-stacked"></i><p>Tiny Homes</p></a></div>
+    <div class="filter"><a href="/listings?category=Adventure"><i class="fa-solid fa-person-hiking"></i><p>Adventure</p></a></div>
+    <div class="filter"><a href="/listings?category=Caves"><i class="fa-solid fa-dungeon"></i><p>Caves</p></a></div>
+  </div>
+
+  <button class="scroll-btn right" onclick="scrollFilters(200)">
+    <i class="fa-solid fa-chevron-right"></i>
+  </button>
+
+  <div class="tax-toggle">
+    <div class="form-check-reverse form-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+      <label class="form-check-label" for="switchCheckDefault">Display total after taxes</label>
+    </div>
+  </div>
+</div>
+
+<% if (q) { %>
+  <div class="mt-4 ms-3">
+    <h5>Showing results for "<%= q %>"</h5>
+  </div>
+<% } %>
+
+<% if (allListings.length === 0) { %>
+  <div class="text-center mt-5">
+    <h4>No listings found.</h4>
+  </div>
+<% } else { %>
+  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
+    <% for (let listing of allListings) { %>
+      <div class="col mb-4">
+        <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
+          <div class="card listing-card h-100">
+            <img 
+              src="<%= listing.image.url %>" 
+              class="card-img-top" 
+              alt="listing_image"
+              style="height: 20rem; object-fit: cover;" 
+            />
+            <div class="card-body">
+              <p class="card-text">
+                <b><%= listing.title %></b><br>
+                <span class="price-without-Tax">
+                  ₹ <%= listing.price.toLocaleString("en-IN") %> / night
+                </span>
+                <span class="price-with-Tax">
+                  <% let total = listing.price + 15 / 100 * listing.price; %>
+                  ₹ <%= total.toLocaleString("en-IN") %> / night
+                  (including 15% GST)
+                </span>
+              </p>
+            </div>
+          </div>
+        </a>
+      </div>
+    <% } %>
+  </div>
+<% } %>
+
+<script>
+  const toggle = document.getElementById("switchCheckDefault");
+  const Pwith = document.getElementsByClassName("price-with-Tax");
+  const Pwithout = document.getElementsByClassName("price-without-Tax");
+
+  function updatePrices() {
+    for (let i = 0; i < Pwith.length; i++) {
+      if (toggle.checked) {
+        Pwithout[i].style.display = "none";
+        Pwith[i].style.display = "inline";
+      } else {
+        Pwithout[i].style.display = "inline";
+        Pwith[i].style.display = "none";
+      }
+    }
+  }
+
+  function scrollFilters(amount) {
+    const filters = document.getElementById('filters');
+    filters.scrollBy({ left: amount, behavior: 'smooth' });
+  }
+
+  updatePrices();
+  toggle.addEventListener("change", updatePrices);
+</script>

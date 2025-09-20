@@ -1,0 +1,119 @@
+<% layout("layouts/boilerplate") %>
+<br><br>
+<div class="row mt-3">
+  <h1 class="col-6 offset-2">Sign Up on <span style="color:#FF5A5F">Roamé</span></h1>
+
+  <!-- Signup Form -->
+  <div class="col-6 offset-2">
+    <form id="signupForm" class="needs-validation" novalidate>
+      <br>
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input name="username" id="username" type="text" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input name="email" id="email" type="email" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input name="password" id="password" type="password" class="form-control" required>
+      </div>
+
+      <br>
+      <button type="submit" class="btn" style="background-color: #FF5A5F; color: white;">Signup</button>
+    </form>
+
+    <!-- OTP Form (Hidden initially) -->
+    <div id="otpContainer" style="display:none;" class="mt-4">
+      <form id="otpForm">
+        <input type="hidden" name="email" id="otpEmail">
+        <div class="mb-3">
+          <label for="otp" class="form-label">Enter OTP</label>
+          <input type="text" name="otp" id="otp" class="form-control" placeholder="Enter OTP" required>
+        </div>
+        <button type="submit" class="btn btn-success">Verify OTP</button>
+      </form>
+      <button id="resendOtpBtn" class="btn btn-warning mt-2">Resend OTP</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const signupForm = document.getElementById("signupForm");
+  const otpContainer = document.getElementById("otpContainer");
+  const otpForm = document.getElementById("otpForm");
+  const resendBtn = document.getElementById("resendOtpBtn");
+  const otpEmailInput = document.getElementById("otpEmail");
+
+  // Signup AJAX
+  signupForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(signupForm);
+    const data = {
+      username: formData.get("username"),
+      email: formData.get("email"),
+      password: formData.get("password")
+    };
+
+    try {
+      const res = await fetch("/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+
+      if (result.error) alert(result.error);
+      else if (result.success) {
+        alert(result.success);
+        signupForm.style.display = "none";
+        otpContainer.style.display = "block";
+        otpEmailInput.value = result.email;
+      }
+    } catch (err) {
+      alert("Something went wrong. Please try again.");
+    }
+  });
+
+  // OTP Verification AJAX
+  otpForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = {
+      email: otpEmailInput.value,
+      otp: document.getElementById("otp").value
+    };
+    try {
+      const res = await fetch("/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.error) alert(result.error);
+      else if (result.success) window.location.href = "/listings";
+    } catch (err) {
+      alert("Something went wrong. Please try again.");
+    }
+  });
+
+  // Resend OTP AJAX
+  resendBtn.addEventListener("click", async () => {
+    const email = otpEmailInput.value;
+    try {
+      const res = await fetch("/resend-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const result = await res.json();
+      alert(result.success || result.error);
+    } catch (err) {
+      alert("Something went wrong. Please try again.");
+    }
+  });
+});
+</script>

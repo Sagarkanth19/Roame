@@ -1,0 +1,546 @@
+      <!-- <% layout("layouts/boilerplate") %>
+        <div class="row mt-3">
+            <div class="col-8 offset-2">
+              <h3>Create a New Listing</h3>
+            
+       <form method="POST" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">          
+        <div class="mb-3">
+          <label for="Title" class="form-label">Title</label>
+           <input 
+            name="listing[title]" placeholder="add a catchy title" 
+            type="text" class="form-control" required>
+            
+              <div class="valid-feedback">Looks good.</div>
+            <div class="invalid-feedback">Please enter a valid title.</div>
+            
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea name="listing[description]"
+             class="form-control" required></textarea>
+             <div class="valid-feedback">Looks good.</div>
+            <div class="invalid-feedback">Please enter a valid description.</div>
+        </div>
+       
+
+        <div class="mb-3">
+  <label for="category" class="form-label">Category</label>
+  <select name="listing[category]" id="category" class="form-select" required>
+    <option value="">Select a category</option>
+    <option value="Rooms">Rooms</option>
+    <option value="Trending">Trending</option>
+    <option value="Iconic Cities">Iconic Cities</option>
+    <option value="Castles">Castles</option>
+    <option value="Camping">Camping</option>
+    <option value="Farms">Farms</option>
+    <option value="Domes">Domes</option>
+    <option value="Mountains">Mountains</option>
+    <option value="Arctic">Arctic</option>
+    <option value="Amazing Pools">Amazing Pools</option>
+    <option value="Boates">Boates</option>
+    <option value="Beachfront">Beachfront</option>
+    <option value="Lake View">Lake View</option>
+    <option value="Cityscapes">Cityscapes</option>
+    <option value="Windmills">Windmills</option>
+    <option value="Luxury">Luxury</option>
+    <option value="Islands">Islands</option>
+    <option value="Treehouses">Treehouses</option>
+    <option value="Tiny Homes">Tiny Homes</option>
+    <option value="Adventure">Adventure</option>
+    <option value="Caves">Caves</option>
+  </select>
+  <div class="valid-feedback">Looks good.</div>
+  <div class="invalid-feedback">Please select a category.</div>
+</div>
+
+
+        <div class="mb-3">
+           <label for="image" class="form-label">Upload Image</label>
+           <input name="listing[image]" 
+           type="file" class="form-control">
+           required
+        </div>
+
+        <div class="row">
+        <div class="mb-3 col-md-4">
+          <label for="price" class="form-label">Price</label>
+          <input name="listing[price]"
+           placeholder="6000" 
+          type="text" 
+          class="form-control" 
+          required> 
+          <div class="valid-feedback">Looks good.</div>
+            <div class="invalid-feedback">Please enter a valid price.</div>    
+        </div>
+        <div class="mb-3 col-md-4">
+          <label for="country" class="form-label">Country</label>
+          <input name="listing[country]"
+           placeholder="India" 
+          type="text"
+           class="form-control"
+            required>  
+          <div class="valid-feedback">Looks good.</div>
+            <div class="invalid-feedback">Please enter a valid country.</div>
+        </div>
+        </div>
+        <div class="mb-3">
+            <label for="location" class="form-label">Location</label>
+            <input name="listing[location]" placeholder="Mumbai,Maharashtra"
+             type="text" class="form-control" required>
+             <div class="valid-feedback">Looks good.</div>
+            <div class="invalid-feedback">Please enter a valid location.</div>
+        </div>
+        
+        <button class="btn btn-dark add-btn mt-3">Add</button>
+        <br><br>
+    </form>
+    </div>
+    </div>  -->
+
+<% layout("layouts/boilerplate") %>
+
+
+<style>
+  body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .form-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    padding: 2rem;
+  }
+  .step-btn {
+    margin: 0 0.5rem;
+    border-radius: 50px;
+  }
+  .step-btn.btn-dark {
+    background-color: #ff5a5f;
+    border-color: #ff5a5f;
+    color: white;
+  }
+  .step-btn:hover {
+    background-color: #ff5a5f;
+    color: white;
+  }
+  .form-label {
+    font-weight: 600;
+  }
+  #map {
+    height: 100%;
+    width: 100%;
+    border: 3px solid #ddd;
+    border-radius: 12px;
+  }
+  #mapContainer {
+    height: 300px;
+  }
+  .next-step, .prev-step, .btn-success {
+    border-radius: 50px;
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+  .btn-primary {
+    background-color: #ff5a5f;
+    border-color: #ff5a5f;
+  }
+  .btn-primary:hover {
+    background-color: #e5484d;
+  }
+  .btn-success {
+    background-color: #2ecc71;
+    border-color: #27ae60;
+  }
+  .btn-success:hover {
+    background-color: #27ae60;
+  }
+  input, select, textarea {
+    border-radius: 12px !important;
+  }
+  .dropdown-menu {
+    z-index: 1050;
+  }
+  /* Show category error below dropdown */
+  #categoryError {
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+    display: none;
+  }
+</style>
+
+<div class="container my-5">
+ <form id="listingForm" method="POST" action="/listings" enctype="multipart/form-data" class="form-container needs-validation" novalidate>
+    <h2 class="mb-4 text-center fw-bold">🌍 Create Your Roamè Listing</h2> 
+
+    <!-- Step Indicators -->
+    <div class="mb-4 text-center">
+      <button type="button" class="btn btn-outline-secondary step-btn" data-step="0">Step 1</button>
+      <button type="button" class="btn btn-outline-secondary step-btn" data-step="1">Step 2</button>
+      <button type="button" class="btn btn-outline-secondary step-btn" data-step="2">Step 3</button>
+    </div>
+
+    <!-- STEP 0: Owner Info -->
+   <div class="form-step" id="step-0">
+      <h4 class="mb-3">👤 Step 1: Owner Information</h4>
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="form-label" for="ownerName">Legal Name</label>
+          <input type="text" id="ownerName" name="listing[ownerName]" class="form-control" required>
+          <div class="valid-feedback">Looks good.</div>
+          <div class="invalid-feedback">Please enter your legal name.</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="dob">Date of Birth</label>
+          <input type="date" id="dob" name="listing[dob]" class="form-control" required>
+          <div class="valid-feedback">Looks good.</div>
+          <div class="invalid-feedback">Please enter your date of birth.</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="contact">Contact Info (Phone Number)</label>
+          <input 
+            id="contact"
+            name="listing[contact]" 
+            type="tel" 
+            class="form-control" 
+            placeholder="9876543210" 
+            pattern="^[6-9]\d{9}$" 
+            required>
+          <div class="valid-feedback">Looks good.</div>
+          <div class="invalid-feedback">Please enter a valid 10-digit phone number.</div>
+        </div>
+      </div>
+      <div class="text-end">
+        <button type="button" class="btn btn-primary next-step">Next →</button>
+      </div>
+    </div>
+
+    <!-- STEP 1: Place Details -->
+    <div class="form-step d-none" id="step-1">
+      <h4 class="mb-3">🏡 Step 2: Place Details</h4>
+
+      <div class="mb-3">
+        <label class="form-label">Categories</label>
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start" type="button" id="categoryDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+            Select categories
+          </button>
+          <ul class="dropdown-menu w-100 px-3" style="max-height: 300px; overflow-y: auto;" aria-labelledby="categoryDropdown">
+            <% const categories = [
+              { icon: "🏠", name: "Rooms" },
+              { icon: "🔥", name: "Trending" },
+              { icon: "🏙️", name: "Iconic Cities" },
+              { icon: "🏰", name: "Castles" },
+              { icon: "🏕️", name: "Camping" },
+              { icon: "🌾", name: "Farms" },
+              { icon: "🏚️", name: "Domes" },
+              { icon: "🏔️", name: "Mountains" },
+              { icon: "❄️", name: "Arctic" },
+              { icon: "🏊‍♂️", name: "Amazing Pools" },
+              { icon: "🚤", name: "Boats" },
+              { icon: "🏖️", name: "Beachfront" },
+              { icon: "🏞️", name: "Lake View" },
+              { icon: "🌆", name: "Cityscapes" },
+              { icon: "🌬️", name: "Windmills" },
+              { icon: "💎", name: "Luxury" },
+              { icon: "🏝️", name: "Islands" },
+              { icon: "🌲", name: "Treehouses" },
+              { icon: "🏠", name: "Tiny Homes" },
+              { icon: "🎒", name: "Adventure" },
+              { icon: "🕳️", name: "Caves" }
+            ]; %>
+            <% categories.forEach(cat => { %>
+              <li>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="listing[category][]" value="<%= cat.name %>" id="cat-<%= cat.name.replace(/\s+/g, '-') %>">
+                  <label class="form-check-label d-flex align-items-center" for="cat-<%= cat.name.replace(/\s+/g, '-') %>">
+                    <span class="me-2"><%= cat.icon %></span> <%= cat.name %>
+                  </label>
+                </div>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+        <div id="categoryError" class="invalid-feedback d-block" style="display:none;">
+          Please select at least one category.
+        </div>
+      </div>
+
+      <div class="mb-3 col-md-6 p-0">
+        <label for="placeType" class="form-label">Place Type</label>
+        <select id="placeType" name="listing[placeType]" class="form-select" required>
+          <option value="">Choose place type</option>
+          <option value="Entire place">Entire place</option>
+          <option value="Private room">Private room</option>
+          <option value="Shared room">Shared room</option>
+        </select>
+        <div class="valid-feedback">Looks good.</div>
+        <div class="invalid-feedback">Please select a place type.</div>
+      </div>
+
+      <div class="mb-3 mt-4">
+        <label for="manualAddress" class="form-label">Full Address</label>
+        <input type="text" id="manualAddress" name="listing[manualAddress]" class="form-control" required>
+        <div class="valid-feedback">Looks good.</div>
+        <div class="invalid-feedback">Please enter a valid address.</div>
+        <button type="button" id="findOnMap" class="btn btn-outline-primary mt-2">📍 Find on Map</button>
+      </div>
+
+      <div class="mb-3" id="mapContainer">
+        <div id="map"></div>
+      
+      </div>
+
+<input type="hidden" name="listing[geometry][type]" value="Point" />
+
+<!-- ✅ Use the array index notation -->
+<input type="hidden" name="listing[geometry][coordinates][0]" id="lngInput" />
+<input type="hidden" name="listing[geometry][coordinates][1]" id="latInput" />
+
+
+<!-- Visible read-only display fields -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <label for="latDisplay" class="form-label">Latitude</label>
+    <input type="text" id="latDisplay" class="form-control" readonly>
+  </div>
+  <div class="col-md-6">
+    <label for="lngDisplay" class="form-label">Longitude</label>
+    <input type="text" id="lngDisplay" class="form-control" readonly>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+      <div class="mb-3">
+        <label for="location" class="form-label">Location</label>
+        <input type="text" id="location" name="listing[location]" placeholder="Mumbai, Maharashtra" class="form-control" required>
+        <div class="valid-feedback">Looks good.</div>
+        <div class="invalid-feedback">Please enter a valid location.</div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <button type="button" class="btn btn-secondary prev-step">← Back</button>
+        <button type="button" class="btn btn-primary next-step">Next →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Final Details -->
+     <div class="form-step d-none" id="step-2">
+      <h4 class="mb-3">✨ Step 3: Final Details</h4>
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <label class="form-label" for="guests">Guests</label>
+          <input type="number" min="1" id="guests" name="listing[guests]" class="form-control" required>
+          <div class="valid-feedback">Looks good.</div>
+          <div class="invalid-feedback">Please enter number of guests.</div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="bedrooms">Bedrooms</label>
+          <input type="number" min="0" id="bedrooms" name="listing[bedrooms]" class="form-control" required>
+          <div class="valid-feedback">Looks good.</div>
+          <div class="invalid-feedback">Please enter number of bedrooms.</div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="beds">Beds</label>
+          <input type="number" min="0" id="beds" name="listing[beds]" class="form-control" required>
+          <div class="valid-feedback">Looks good.</div>
+          <div class="invalid-feedback">Please enter number of beds.</div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" for="bathrooms">Bathrooms</label>
+          <input type="number" min="0" id="bathrooms" name="listing[bathrooms]" class="form-control" required>
+          <div class="valid-feedback">Looks good.</div>
+          <div class="invalid-feedback">Please enter number of bathrooms.</div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="image">Upload Photo</label>
+        <input type="file" accept="image/*" id="image" name="listing[image]" class="form-control" required>
+        <div class="valid-feedback">Looks good.</div>
+        <div class="invalid-feedback">Please upload a photo.</div>
+      </div>
+ 
+      <div class="mb-3">
+        <label class="form-label" for="title">Title</label>
+        <input type="text" id="title" name="listing[title]" class="form-control" required>
+        <div class="valid-feedback">Looks good.</div>
+        <div class="invalid-feedback">Please enter a title.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="description">Description</label>
+        <textarea id="description" name="listing[description]" class="form-control" required></textarea>
+        <div class="valid-feedback">Looks good.</div>
+        <div class="invalid-feedback">Please enter a description.</div>
+      </div>
+
+
+      <div class="mb-3">
+        <label class="form-label" for="price">Base Price (₹)</label>
+        <input type="number" min="0" id="price" name="listing[price]" class="form-control" required>
+        <div class="valid-feedback">Looks good.</div>
+        <div class="invalid-feedback">Please enter the price.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="residentialAddress">Residential Address</label>
+        <textarea id="residentialAddress" name="listing[residentialAddress]" class="form-control" required></textarea>
+        <div class="valid-feedback">Looks good.</div>
+        <div class="invalid-feedback">Please enter your residential address.</div>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <button type="button" class="btn btn-secondary prev-step">← Back</button>
+        <button type="submit" class="btn btn-success"> Publish Listing</button>
+      </div>
+    </div>
+  </form>
+
+</div>
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1Ijoic2FnYXJycnJyIiwiYSI6ImNtY3QzODc1dDAwem4yanF1aGU0cW90MXQifQ.oLSt92p2YCYVPPuj263GHw';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // ---------- STEP NAVIGATION ----------
+    const steps = document.querySelectorAll(".form-step");
+    const nextBtns = document.querySelectorAll(".next-step");
+    const prevBtns = document.querySelectorAll(".prev-step");
+    const stepTabs = document.querySelectorAll(".step-btn");
+
+    let currentStep = 0;
+
+    function showStep(index) {
+      steps.forEach((step, i) => {
+        step.classList.toggle("d-none", i !== index);
+        stepTabs[i].classList.toggle("btn-dark", i === index);
+        stepTabs[i].classList.toggle("btn-outline-secondary", i !== index);
+      });
+      currentStep = index;
+
+      if (index === 1) {
+          setTimeout(() => {
+              map.resize();
+          }, 1);
+      }
+    }
+
+    nextBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const currentFormStep = steps[currentStep];
+        const inputs = currentFormStep.querySelectorAll("input, select, textarea");
+
+        let valid = true;
+        inputs.forEach((input) => {
+          if (!input.checkValidity()) valid = false;
+          input.classList.add("was-validated");
+        });
+
+        if (valid && currentStep < steps.length - 1) {
+          showStep(currentStep + 1);
+        }
+      });
+    });
+
+    prevBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (currentStep > 0) showStep(currentStep - 1);
+      });
+    });
+
+    stepTabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => {
+        showStep(index);
+      });
+    });
+
+    showStep(0); // Show first step on load
+
+    // ---------- MAPBOX SETUP ----------
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v11',
+      center: [77.2090, 28.6139], // Default to Delhi
+      zoom: 10
+    });
+
+    const marker = new mapboxgl.Marker({ draggable: true })
+      .setLngLat([77.2090, 28.6139])
+      .addTo(map);
+
+    // ---------- INPUT ELEMENTS ----------
+    const lngInput = document.getElementById('lngInput');           // hidden
+    const latInput = document.getElementById('latInput');           // hidden
+    const lngDisplay = document.getElementById('lngDisplay');       // readonly
+    const latDisplay = document.getElementById('latDisplay');       // readonly
+    const addressInput = document.getElementById('manualAddress');  // address textbox
+    const locationInput = document.querySelector('input[name="listing[location]"]'); // hidden full address
+
+    function updateInputs(lng, lat) {
+  document.getElementById('lngInput').value = lng;
+  document.getElementById('latInput').value = lat;
+
+  document.getElementById('lngDisplay').value = lng;
+  document.getElementById('latDisplay').value = lat;
+}
+
+
+    // On marker drag end
+    marker.on('dragend', () => {
+      const lngLat = marker.getLngLat();
+      updateInputs(lngLat.lng, lngLat.lat);
+
+      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lngLat.lng},${lngLat.lat}.json?access_token=${mapboxgl.accessToken}`)
+        .then(res => res.json())
+        .then(data => {
+          const place = data.features[0]?.place_name || '';
+          if (locationInput) locationInput.value = place;
+        });
+    });
+
+    // "Find on Map" button
+    const findBtn = document.getElementById('findOnMap');
+    if (findBtn) {
+      findBtn.addEventListener('click', () => {
+        const address = addressInput?.value?.trim();
+        if (!address) {
+          alert("Please enter an address.");
+          return;
+        }
+
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${mapboxgl.accessToken}`)
+          .then(res => res.json())
+          .then(data => {
+            const feature = data.features[0];
+            if (!feature) {
+              alert("Address not found.");
+              return;
+            }
+
+            const [lng, lat] = feature.geometry.coordinates;
+            marker.setLngLat([lng, lat]);
+            map.flyTo({ center: [lng, lat], zoom: 14 });
+            updateInputs(lng, lat);
+
+            if (locationInput) {
+              locationInput.value = feature.place_name;
+              locationInput.classList.remove('is-invalid');
+              locationInput.classList.add('is-valid');
+            }
+          })
+          .catch(() => alert("Failed to fetch location data."));
+      });
+    }
+
+    // ---------- SET DEFAULT COORDINATES ----------
+    updateInputs(77.2090, 28.6139); // Default to Delhi
+  });
+</script>

@@ -1,0 +1,246 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #444;
+}
+
+.welcome-header {
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: #222;
+}
+
+.section-header {
+  font-size: 1.3rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px dashed #ffe4c4;
+  margin-bottom: 1rem;
+}
+
+.dashboard-card {
+  background: #faf8f8ff;
+  border-radius: 1.25rem;
+  border: none;
+  box-shadow: 0 4px 12px rgba(255, 182, 193, 0.15);
+  transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(255, 182, 193, 0.25);
+}
+
+.map-container {
+  height: 200px;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.map-container:hover {
+  transform: scale(1.02);
+}
+
+.text-muted-light {
+  font-size: 0.9rem;
+  color: #777 !important;
+}
+
+.btn-bubble {
+  background: linear-gradient(135deg, #ffb347, #ffcc33);
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  padding: 0.5rem 1.2rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-bubble:hover {
+  background: linear-gradient(135deg, #ffcc33, #ffb347);
+  transform: translateY(-2px);
+}
+</style>
+
+<div class="container py-5">
+  <h1 class="mb-5 welcome-header">Welcome, <span class="fw-bold"><%= user.username %></span>!</h1>
+
+  <section class="mb-5">
+    <h2 class="mb-4 section-header">Your Trips</h2>
+    <% if (userBookings.length > 0) { %>
+      <div class="row g-4">
+        <% userBookings.forEach((b, index) => { 
+            const nights = Math.ceil((new Date(b.checkOut) - new Date(b.checkIn)) / (1000 * 60 * 60 * 24));
+        %>
+          <div class="col-lg-6">
+            <div class="card shadow-sm h-100 dashboard-card">
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-3">
+                  <i class="fa-solid fa-mountain-sun me-2 text-primary opacity-75"></i>
+                  <%= b.listing.title %>
+                </h5>
+                <p class="mb-3 text-muted-light">
+                  <i class="fa-solid fa-map-pin me-2 text-secondary"></i>
+                  <%= b.listing.residentialAddress || b.listing.location %>
+                </p>
+                <div class="d-flex justify-content-between mb-3">
+                  <p class="mb-0">
+                    <i class="fa-solid fa-calendar-check me-2 text-success"></i>
+                    <strong>Check-in:</strong> <%= new Date(b.checkIn).toLocaleDateString() %>
+                  </p>
+                  <p class="mb-0">
+                    <i class="fa-solid fa-calendar-xmark me-2 text-danger"></i>
+                    <strong>Check-out:</strong> <%= new Date(b.checkOut).toLocaleDateString() %>
+                  </p>
+                </div>
+                <p class="mb-3 text-muted-light">Booked for <%= nights %> nights.</p>
+                <div 
+                  id="map-booking-<%= index %>" 
+                  class="map-container mt-auto" 
+                  onclick="openGoogleMaps(<%= b.listing.geometry.coordinates[1] %>, <%= b.listing.geometry.coordinates[0] %>)">
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="text-center p-5 bg-light rounded">
+        <p class="lead text-muted">You haven't planned any trips yet. Time for an adventure! 🗺️</p>
+      </div>
+    <% } %>
+  </section>
+
+  <% if (user.isHost) { %>
+    <hr class="my-5">
+
+    <section class="mb-5">
+      <div class="d-flex justify-content-between align-items-center mb-4 section-header">
+        <h2>Your Host Dashboard</h2>
+        <a href="/listings/new" class="btn btn-success">
+          <i class="fa-solid fa-plus me-2"></i>Create New Listing
+        </a>
+      </div>
+
+      <h3 class="mb-4 fw-light">Your Properties</h3>
+      <% if (hostListings.length > 0) { %>
+        <div class="row g-4">
+          <% hostListings.forEach(l => { %>
+            <div class="col-lg-6">
+              <div class="card shadow-sm h-100 dashboard-card">
+                <div class="card-body">
+                  <h5 class="card-title"><%= l.title %></h5>
+                  <p class="mb-3 text-muted-light">
+                    <i class="fa-solid fa-map-pin me-2 text-secondary"></i>
+                    <%= l.residentialAddress || l.location %>
+                  </p>
+                  <a href="/listings/<%= l._id %>/edit" class="btn btn-sm btn-outline-primary">
+                    <i class="fa-solid fa-pen-to-square me-2"></i>Manage Listing
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="text-center p-5 bg-light rounded">
+          <p class="lead text-muted">You haven’t listed any properties yet. Start hosting today! 🏡</p>
+        </div>
+      <% } %>
+    </section>
+
+    <section>
+      <h3 class="mb-4 fw-light">Guest Bookings</h3>
+      <% if (bookingsOnHostListings.length > 0) { %>
+        <div class="row g-4">
+          <% bookingsOnHostListings.forEach((b, index) => { 
+              const nights = Math.ceil((new Date(b.checkOut) - new Date(b.checkIn)) / (1000 * 60 * 60 * 24));
+          %>
+            <div class="col-lg-6">
+              <div class="card shadow-sm h-100 dashboard-card">
+                <div class="card-body d-flex flex-column">
+                  <p class="mb-2">
+                    <i class="fa-solid fa-user me-2 text-primary opacity-75"></i>
+                    <strong><%= b.user.username %></strong> booked <strong><%= b.listing.title %></strong>
+                  </p>
+                  <p class="mb-3 text-muted-light">
+                    <i class="fa-solid fa-phone me-2"></i>
+                    Contact: <%= b.listing.contact || "Not provided" %>
+                  </p>
+                  <div class="d-flex justify-content-between mb-2">
+                     <p class="mb-0">
+                      <i class="fa-solid fa-calendar-check me-2 text-success"></i>
+                       <%= new Date(b.checkIn).toLocaleDateString() %>
+                    </p>
+                    <i class="fa-solid fa-arrow-right-long my-auto"></i>
+                    <p class="mb-0">
+                      <i class="fa-solid fa-calendar-xmark me-2 text-danger"></i>
+                      <%= new Date(b.checkOut).toLocaleDateString() %>
+                    </p>
+                  </div>
+                  <p class="mb-3 text-muted-light"><%= nights %> nights stay for <strong>₹<%= b.totalPrice.toLocaleString('en-IN') %></strong></p>
+                  <div 
+                    id="map-host-booking-<%= index %>" 
+                    class="map-container mt-auto"
+                    onclick="openGoogleMaps(<%= b.listing.geometry.coordinates[1] %>, <%= b.listing.geometry.coordinates[0] %>)">
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="text-center p-5 bg-light rounded">
+          <p class="lead text-muted">No one has booked your listings yet. Keep an eye out! 👀</p>
+        </div>
+      <% } %>
+    </section>
+  <% } %>
+</div>
+
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+
+<script>
+  // Your Mapbox Access Token
+  mapboxgl.accessToken = 'pk.eyJ1Ijoic2FnYXJycnJyIiwiYSI6ImNtY3QzODc1dDAwem4yanF1aGU0cW90MXQifQ.oLSt92p2YCYVPPuj263GHw';
+
+  /**
+   * Initializes a Mapbox map on a given element with specified coordinates.
+   * @param {string} containerId - The ID of the HTML element to contain the map.
+   * @param {Array<number>} coordinates - The [longitude, latitude] for the map center and marker.
+   */
+  function initializeMap(containerId, coordinates) {
+    const map = new mapboxgl.Map({
+      container: containerId,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: coordinates,
+      zoom: 10,
+      interactive: false // Makes map non-interactive for a cleaner preview
+    });
+    new mapboxgl.Marker()
+      .setLngLat(coordinates)
+      .addTo(map);
+  }
+
+  // Initialize maps for user bookings
+  <% userBookings.forEach((b, index) => { %>
+    initializeMap('map-booking-<%= index %>', [<%= b.listing.geometry.coordinates[0] %>, <%= b.listing.geometry.coordinates[1] %>]);
+  <% }) %>
+
+  // Initialize maps for bookings on host listings
+  <% bookingsOnHostListings.forEach((b, index) => { %>
+    initializeMap('map-host-booking-<%= index %>', [<%= b.listing.geometry.coordinates[0] %>, <%= b.listing.geometry.coordinates[1] %>]);
+  <% }) %>
+
+  /**
+   * Opens Google Maps in a new tab at the specified coordinates.
+   * @param {number} lat - The latitude.
+   * @param {number} lng - The longitude.
+   */
+  function openGoogleMaps(lat, lng) {
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+  }
+</script>

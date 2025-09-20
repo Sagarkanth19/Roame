@@ -1,0 +1,99 @@
+<style>
+  .search-btn {
+    background-color: #FF5A5F;
+    color: #fff;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(255, 90, 95, 0.3);
+    border-radius: 25px;
+    padding: 0 1rem;
+  }
+
+  .search-btn:hover {
+    background-color: #FF5A5F;
+    box-shadow: 0 6px 16px rgba(255, 90, 95, 0.4);
+  }
+
+  .search-inp {
+    border-radius: 25px;
+    padding: 0.5rem 7rem 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .logo {
+    width: 120px;
+    height: auto;
+  }
+
+  .nav-link i {
+    margin-right: 6px;
+  }
+
+  /* Center the search bar absolutely */
+  .center-search {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  @media (max-width: 768px) {
+    .center-search {
+      position: static;
+      transform: none;
+      margin: 0 auto;
+      padding: 0.5rem 1rem;
+    }
+  }
+</style>
+
+<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
+  <div class="container-fluid position-relative">
+    <!-- Logo -->
+    <a class="navbar-brand" href="/listings">
+      <img class="logo" src="/imgs/Roam_og.png" alt="Roamè Logo">
+    </a>
+
+    <!-- Toggle for mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Search Bar (centered absolutely) -->
+    <div class="navbar-nav center-search">
+      <form class="d-flex" role="search" method="GET" action="/listings">
+        <input class="form-control me-2 search-inp" type="search" name="q" placeholder="Search destinations..." />
+        <button class="btn search-btn d-flex align-items-center" type="submit">
+          <i class="fa-solid fa-magnifying-glass me-2"></i> Search
+        </button>
+      </form>
+    </div>
+
+    <!-- Right-aligned navigation -->
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
+      <div class="navbar-nav ms-auto">
+        <% if (typeof currUser !== "undefined" && currUser) { %>
+          <a class="nav-link" href="/dashboard">
+            <i class="fa-solid fa-house-user"></i> Dashboard
+          </a>
+        <% } %>
+
+        <a class="nav-link" href="/listings/new">
+          <i class="fa-solid fa-circle-plus"></i> Become a Host
+        </a>
+
+        <% if (typeof currUser !== "undefined" && currUser) { %>
+          <a class="nav-link" href="/logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Log out
+          </a>
+        <% } else { %>
+          <a class="nav-link" href="/signup">
+            <i class="fa-solid fa-user-plus"></i> Sign up
+          </a>
+          <a class="nav-link" href="/login">
+            <i class="fa-solid fa-right-to-bracket"></i> Log in
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>

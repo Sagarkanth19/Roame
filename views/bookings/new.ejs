@@ -1,0 +1,264 @@
+
+
+
+<% layout("layouts/boilerplate") %>
+<style>
+    /* Custom styles for the modern booking page */
+    .booking-card {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 20px; /* Keeps the card visible on scroll */
+    }
+    .price-breakdown-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 1rem;
+    }
+    #pay-btn {
+        width: 100%;
+        font-weight: 600;
+        padding: 12px;
+    }
+    .listing-image-small {
+        width: 125px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="row mt-3">
+    <div class="col-md-7">
+        <h2>Booking Details</h2>
+        <hr>
+        <h4><%= listing.title %></h4>
+        <p><%= listing.description %></p>
+        <div class="d-flex align-items-center mb-4">
+            <img src="<%= listing.image.url %>" alt="Listing Image" class="listing-image-small me-3">
+            <div>
+                <strong>Location:</strong> <%= listing.location %><br>
+                <strong>Category:</strong> <%= listing.category %>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="booking-card">
+            <h4 class="mb-4">Reserve Your Spot</h4>
+            <form id="booking-form" class="needs-validation" novalidate>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label for="checkIn" class="form-label">Check-In</label>
+                        <input type="text" id="checkIn" class="form-control" placeholder="Select check-in date" required>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label for="checkOut" class="form-label">Check-Out</label>
+                        <input type="text" id="checkOut" class="form-control" placeholder="Select check-out date" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="guests" class="form-label">Guests</label>
+                    <input type="number" value="1" min="1" id="guests" class="form-control" required>
+                </div>
+                <hr>
+
+                <div id="price-breakdown" style="display: none;" class="mb-3">
+                    <div class="price-breakdown-row">
+                        <span id="price-calc-text"></span>
+                        <span id="base-price-text"></span>
+                    </div>
+                    <div class="price-breakdown-row">
+                        <span>GST (15%)</span>
+                        <span id="gst-text"></span>
+                    </div>
+                    <hr>
+                    <div class="price-breakdown-row">
+                        <strong>Total</strong>
+                        <strong id="total-price-text"></strong>
+                    </div>
+                </div>
+
+                <button type="button" id="pay-btn" class="btn btn-primary" disabled>Select Dates to Reserve</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    // -------------------- DOM Elements --------------------
+    const payButton = document.getElementById("pay-btn");
+    const checkInInput = document.getElementById("checkIn");
+    const checkOutInput = document.getElementById("checkOut");
+    const priceBreakdownDiv = document.getElementById("price-breakdown");
+    const guestsInput = document.getElementById("guests");
+
+    // -------------------- Data --------------------
+    const listingPrice = <%- JSON.stringify(listing.price) %>;
+    const disabledDates = <%- JSON.stringify(disabledDates) %>; // array of "YYYY-MM-DD"
+    let totalPrice = 0;
+
+    // -------------------- ✅ ROBUST DATE HELPER --------------------
+    /**
+     * Creates a Date object in UTC to avoid time zone issues.
+     * @param {string} dateString - A date in "YYYY-MM-DD" format.
+     * @returns {Date} A reliable Date object.
+     */
+    function parseDateAsUTC(dateString) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        // Month is 0-indexed in JavaScript, so subtract 1
+        return new Date(Date.UTC(year, month - 1, day));
+    }
+
+    // -------------------- Initialize Flatpickr --------------------
+    let checkOutPicker;
+
+    const checkInPicker = flatpickr(checkInInput, {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: disabledDates,
+        onChange: function(selectedDates) {
+            if (selectedDates.length === 0) return;
+
+            const checkInStr = selectedDates[0].toISOString().split('T')[0];
+            const checkInDate = parseDateAsUTC(checkInStr);
+
+            const minCheckOut = new Date(checkInDate);
+            minCheckOut.setUTCDate(minCheckOut.getUTCDate() + 1);
+
+            // Find the next disabled date after check-in to block range selections
+            const nextDisabledDateStr = disabledDates
+                .sort()
+                .find(dateStr => parseDateAsUTC(dateStr) > checkInDate);
+            
+            if (checkOutPicker) checkOutPicker.destroy();
+            
+            checkOutPicker = flatpickr(checkOutInput, {
+                dateFormat: "Y-m-d",
+                minDate: minCheckOut,
+                disable: disabledDates,
+                // Smartly set the maximum date to the day before the next booking
+                ...(nextDisabledDateStr && { maxDate: nextDisabledDateStr }),
+                onChange: updatePriceAndButton
+            });
+
+            // Auto-open the checkout calendar for better UX
+            checkOutPicker.open();
+
+            // Clear old check-out value if it's now invalid
+            if (checkOutInput.value) {
+                const currentCheckOut = parseDateAsUTC(checkOutInput.value);
+                if (currentCheckOut <= checkInDate || (nextDisabledDateStr && currentCheckOut >= parseDateAsUTC(nextDisabledDateStr))) {
+                    checkOutInput.value = "";
+                }
+            }
+            updatePriceAndButton();
+        }
+    });
+
+    // -------------------- Price & Validation --------------------
+    function updatePriceAndButton() {
+        const checkInVal = checkInInput.value;
+        const checkOutVal = checkOutInput.value;
+
+        if (!checkInVal || !checkOutVal) {
+            priceBreakdownDiv.style.display = "none";
+            payButton.textContent = "Select Dates to Reserve";
+            payButton.disabled = true;
+            return;
+        }
+
+        const checkInDate = parseDateAsUTC(checkInVal);
+        const checkOutDate = parseDateAsUTC(checkOutVal);
+
+        const nights = Math.round((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+
+        if (nights <= 0) return; // Should not happen with Flatpickr config, but safe to have
+
+        const basePrice = listingPrice * nights;
+        const gst = Math.round(basePrice * 0.15);
+        totalPrice = basePrice + gst;
+
+        document.getElementById("price-calc-text").textContent = `₹${listingPrice.toLocaleString()} x ${nights} nights`;
+        document.getElementById("base-price-text").textContent = `₹${basePrice.toLocaleString()}`;
+        document.getElementById("gst-text").textContent = `₹${gst.toLocaleString()}`;
+        document.getElementById("total-price-text").textContent = `₹${totalPrice.toLocaleString()}`;
+
+        priceBreakdownDiv.style.display = 'block';
+        payButton.textContent = 'Reserve & Pay';
+        payButton.disabled = false;
+    }
+
+    // -------------------- Razorpay Payment (Unchanged) --------------------
+    payButton.addEventListener("click", async function (e) {
+        e.preventDefault();
+
+        payButton.disabled = true;
+        payButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...`;
+
+        try {
+            const orderResponse = await fetch("/payment/create-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: totalPrice })
+            });
+            const order = await orderResponse.json();
+            if (!order || order.error) throw new Error("Payment gateway error. Please try again.");
+
+            const options = {
+                key: "<%= razorpayKey %>",
+                amount: order.amount,
+                currency: order.currency,
+                name: "Roamè Bookings",
+                description: `Payment for <%= listing.title %>`,
+                image: "/imgs/Roam_logo.png",
+                order_id: order.id,
+                handler: async function (response) {
+                    const bookingDetails = {
+                        listingId: "<%= listing._id %>",
+                        checkIn: checkInInput.value,
+                        checkOut: checkOutInput.value,
+                        guests: guestsInput.value,
+                        amount: totalPrice
+                    };
+
+                    const verificationResponse = await fetch('/payment/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...response, bookingDetails })
+                    });
+                    const result = await verificationResponse.json();
+
+                    if (result.status === 'success') {
+                        window.location.href = '/payment/payment-success';
+                    } else {
+                        alert('Payment verification failed. Please try again.');
+                        updatePriceAndButton();
+                    }
+                },
+                modal: {
+                    ondismiss: function() {
+                        updatePriceAndButton();
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+
+        } catch (error) {
+            alert(error.message);
+            updatePriceAndButton();
+        }
+    });
+</script>

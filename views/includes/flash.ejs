@@ -1,0 +1,49 @@
+<% if ((typeof success !== "undefined" && success.length) || (typeof error !== "undefined" && error.length)) { %>
+  <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-4" style="z-index: 1055;">
+
+    <% if (typeof success !== "undefined" && success.length) { %>
+        <div class="toast align-items-center text-white bg-success border-0 show mb-3 animate-toast" role="alert">
+          <div class="d-flex">
+            <div class="toast-body">
+              <i class="bi bi-check-circle-fill me-2"></i> <%= success %>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+    <% } %>
+
+    <% if (typeof error !== "undefined" && error.length) { %>
+        <div class="toast align-items-center text-white bg-danger border-0 show mb-3 animate-toast" role="alert">
+          <div class="d-flex">
+            <div class="toast-body">
+              <i class="bi bi-x-circle-fill me-2"></i> <%= error %>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+    <% } %>
+
+  </div>
+
+  <style>
+    .animate-toast {
+      animation: fadeSlideIn 0.6s ease-out;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+  <script>
+    // Auto-dismiss toasts after 4 seconds
+    document.addEventListener("DOMContentLoaded", () => {
+      const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+      toastElList.forEach(toastEl => {
+        const bsToast = new bootstrap.Toast(toastEl, { delay: 4000, autohide: true });
+        bsToast.show();
+      });
+    });
+  </script>
+<% } %>
