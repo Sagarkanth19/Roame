@@ -2,98 +2,132 @@
 
 <style>
   .filters-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-    padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column; /* mobile defaults to column */
+  padding: 0.5rem 1rem;
+}
+
+.filters-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Filters container */
+#filters {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  scrollbar-width: none;
+  flex: 1 1 auto; /* desktop: take remaining space */
+  max-width: calc(100% - 120px); /* leave room for right button + toggle */
+}
+
+#filters::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scroll buttons */
+.scroll-btn {
+  background-color: white;
+  border: none;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+.scroll-btn.left {
+  margin-right: 0.5rem;
+}
+
+.scroll-btn.right {
+  margin-left: 0.5rem;
+}
+
+/* Filter items */
+.filter {
+  flex: 0 0 auto;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.filter a {
+  text-decoration: none;  /* remove underline */
+  color: black;            /* black text */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.filter i {
+  font-size: 1rem;  /* smaller icons */
+  color: black;     /* black color */
+}
+
+.filter p {
+  font-size: 0.7rem; /* smaller text */
+  color: black;       /* black text */
+  margin-top: 0.2rem;
+}
+
+
+.filter:hover {
+  opacity: 1;
+  transform: scale(1.2);
+  transition: all 0.3s ease;
+}
+
+/* Tax toggle */
+.tax-toggle {
+  border: 1px solid rgb(127,127,127);
+  border-radius: 1rem;
+  height: 3.2rem;
+  padding: 1rem;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .filters-container {
+    flex-direction: column;
+    align-items: stretch;
+    margin-top:15px;
+  }
+
+  .filters-row {
+    justify-content: flex-start;
+    width: 100%;
   }
 
   #filters {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 1.5rem;
-    padding: 1rem 0;
-    scrollbar-width: none;
-  }
-
-  #filters::-webkit-scrollbar {
-    display: none;
-  }
-
-  .filter {
-    flex: 0 0 auto;
-    text-align: center;
-    opacity: 0.7;
-  }
-
-  .filter:hover {
-    opacity: 1;
-    cursor: pointer;
-    transform: scale(1.2);
-    transition: all 0.3s ease;
-  }
-
-  .filter p {
-    font-size: 0.8em;
-    margin-top: 0.2rem;
-  }
-
-  .filter a {
-    text-decoration: none;
-    color: inherit;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex: 1 1 auto;
+    max-width: 100%; /* filters full width on mobile */
+    padding: 0.5rem 0;
   }
 
   .tax-toggle {
-    border: 1px solid rgb(127, 127, 127);
-    border-radius: 1rem;
-    height: 3.2rem;
-    padding: 1rem;
-    margin-left: 1rem;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
+    width: 100%;
   }
+}
 
-  .form-check-input:checked {
-    background-color: #FF5A5F;
-    border-color: #FF5A5F;
-    box-shadow: 0 0 0 0.25rem rgba(255, 90, 95, 0.25);
-  }
 
-  .form-check-input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(255, 90, 95, 0.25);
-  }
-
-  .scroll-btn {
-    background-color: white;
-    border: none;
-    font-size: 1.5rem;
-    padding: 0.5rem;
-    cursor: pointer;
-    z-index: 2;
-  }
-
-  .scroll-btn.left {
-    margin-right: 0.2rem;
-  }
-
-  .scroll-btn.right {
-    margin-left: 0.2rem;
-  }
 </style>
 
 <div class="filters-container">
-  <button class="scroll-btn left" onclick="scrollFilters(-200)">
-    <i class="fa-solid fa-chevron-left"></i>
-  </button>
+  <div class="filters-row">
+    <button class="scroll-btn left" onclick="scrollFilters(-200)">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
 
-  <div id="filters">
-    <div class="filter"><a href="/listings?category=Rooms"><i class="fa-solid fa-bed"></i><p>Rooms</p></a></div>
+    <div id="filters">
+       <div class="filter"><a href="/listings?category=Rooms"><i class="fa-solid fa-bed"></i><p>Rooms</p></a></div>
     <div class="filter"><a href="/listings?category=Trending"><i class="fa-solid fa-fire"></i><p>Trending</p></a></div>
     <div class="filter"><a href="/listings?category=Iconic Cities"><i class="fa-solid fa-mountain-city"></i><p>Iconic Cities</p></a></div>
     <div class="filter"><a href="/listings?category=Castles"><i class="fa-solid fa-chess"></i><p>Castles</p></a></div>
@@ -114,19 +148,30 @@
     <div class="filter"><a href="/listings?category=Tiny Homes"><i class="fa-solid fa-cubes-stacked"></i><p>Tiny Homes</p></a></div>
     <div class="filter"><a href="/listings?category=Adventure"><i class="fa-solid fa-person-hiking"></i><p>Adventure</p></a></div>
     <div class="filter"><a href="/listings?category=Caves"><i class="fa-solid fa-dungeon"></i><p>Caves</p></a></div>
+    </div>
+
+    <button class="scroll-btn right" onclick="scrollFilters(200)">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+
+    <!-- Desktop toggle next to filters -->
+    <div class="tax-toggle d-none d-md-flex">
+      <div class="form-check-reverse form-switch">
+        <input class="form-check-input" type="checkbox" id="switchCheckDefault">
+        <label class="form-check-label" for="switchCheckDefault">Display total after taxes</label>
+      </div>
+    </div>
   </div>
 
-  <button class="scroll-btn right" onclick="scrollFilters(200)">
-    <i class="fa-solid fa-chevron-right"></i>
-  </button>
-
-  <div class="tax-toggle">
+  <!-- Mobile toggle in new row -->
+  <div class="tax-toggle d-flex d-md-none">
     <div class="form-check-reverse form-switch">
-      <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
-      <label class="form-check-label" for="switchCheckDefault">Display total after taxes</label>
+      <input class="form-check-input" type="checkbox" id="switchCheckDefaultMobile">
+      <label class="form-check-label" for="switchCheckDefaultMobile">Display total after taxes</label>
     </div>
   </div>
 </div>
+
 
 <% if (q) { %>
   <div class="mt-4 ms-3">
