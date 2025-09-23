@@ -144,6 +144,12 @@ router.get("/payment-success", async (req, res) => {
                 gst: gst,
                 totalAmount: total,
             };
+const fs = require("fs");
+
+const invoicesDir = path.join(__dirname, "../invoices");
+if (!fs.existsSync(invoicesDir)) {
+    fs.mkdirSync(invoicesDir);
+}
 
             generateInvoice(bookingData, filePath);
 
